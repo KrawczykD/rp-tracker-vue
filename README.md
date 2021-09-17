@@ -1,5 +1,9 @@
 # rp-tracker-vue
 
+This Tracker app is a part of route planer system. App is build with using VUE3, Storybook, Leafletjs
+
+## VUE
+
 ## Project setup
 ```
 npm install
@@ -20,5 +24,16 @@ npm run build
 npm run lint
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## STORYBOOK
+
+### Compiles and hot-reloads for development
+```
+npm run storybook
+```
+
+### Compiles and minifies for production
+```
+npm run build-storybook
+```
+
+
