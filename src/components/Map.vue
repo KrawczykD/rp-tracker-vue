@@ -1,5 +1,5 @@
 <template>
-   <div id="mapid"><slot></slot></div>
+   <div :style="{height: mapheight , width: mapwidth}" :id="mapid"><slot></slot></div>
 </template>
 
 <script>
@@ -10,6 +10,7 @@ export default {
     mounted:function(){
         this.mapInit()      
     },
+    props:['mapid','mapheight','mapwidth'],
     data:function(){
         return{
             map: null
@@ -23,7 +24,7 @@ export default {
 
     methods:{
         mapInit:function(){
-        this.map = L.map('mapid').setView([53.50, -2.19], 13);
+        this.map = L.map(this.mapid).setView([53.50, -2.19], 13);
 
             L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
