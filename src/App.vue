@@ -1,9 +1,8 @@
 <template>
   <h1>HELLO WORLD! RP TRACKER APP</h1>
-  <button v-on:click="add('long')">Longitude +</button>
-  <button v-on:click="add('lat')">Latitude +</button>
+  <div>Marker Id 0 Lat:{{markers[0].lat}} Lng:{{markers[0].lng}}</div>
   <t-map>
-    <t-marker :lat="lat" :long="long">
+    <t-marker :markerid="0" :lat="markers[0].lat" :lng="markers[0].lng" v-on:moveMarker="moveMarker">
 
     </t-marker>
   </t-map>
@@ -22,18 +21,19 @@ export default {
   },
   data:function(){
     return {
-      lat : 53.50,
-      long : -2.19
+      markers:[
+        {
+          lat : 53.50,
+          lng : -2.19
+        }
+      ]
     }
   },
   methods:{
-    add:function(option){
-      if(option === 'lat'){
-        this.lat += 0.001
-      } else {
-        this.long += 0.001
-      }
+    moveMarker:function(id,latLng){
+      this.markers[id] = latLng
     }
+
   }
 }
 </script>
