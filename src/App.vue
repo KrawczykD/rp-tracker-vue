@@ -1,19 +1,28 @@
 <template>
   <h1 class="text-center">HELLO WORLD! RP TRACKER APP</h1>
-  <h2 :class="['text-center', isInRange ? 'btn-success' : 'btn-danger']">{{isInRange ? 'Grate news! We can delivery to your address!' : 'Bad news! We can NOT delivery to your address :('}}</h2>
-  <ul v-for="(marker, index) in markers" :key="index" class="list">
-    <li v-for="(postcode, index) in marker.postcodes" :key="index">
-      {{postcode.place_name}}
-    </li>
-  </ul>
+  <h2 :class="['text-center', isInRange ? 'btn-success' : 'btn-danger']">
+    {{
+      isInRange
+        ? "Grate news! We can delivery to your address!"
+        : "Bad news! We can NOT delivery to your address :("
+    }}
+  </h2>
   <div class="d-flex justify-content-center align-items-center">
     <br /><br />
+    <t-geocoder
+      v-on:search="setMarker"
+    ></t-geocoder>
     <button
-      :class="['btn m-2', markers[1].isMarkerDraggable ? 'btn-success' : 'btn-danger']"
+      :class="[
+        'btn m-2',
+        markers[1].isMarkerDraggable ? 'btn-success' : 'btn-danger',
+      ]"
       :key="index"
       v-on:click="markers[1].isMarkerDraggable = !markers[1].isMarkerDraggable"
       v-html="
-        `Base marker is ${markers[1].isMarkerDraggable ? 'draggable' : 'non draggable'}`
+        `Base marker is ${
+          markers[1].isMarkerDraggable ? 'draggable' : 'non draggable'
+        }`
       "
     ></button>
     <br /><br />
@@ -51,8 +60,9 @@
 import Map from "./components/Map.vue";
 import Marker from "./components/Marker.vue";
 import Circle from "./components/Circle.vue";
-import fetchPostcodes from './components/fetchPostcodes.vue'
-
+import fetchPostcodes from "./components/fetchPostcodes.vue";
+import geocoder from "./components/geoCoder.vue";
+import { latLng } from 'leaflet'
 
 export default {
   name: "App",
@@ -60,65 +70,80 @@ export default {
     "t-map": Map,
     "t-marker": Marker,
     "t-circle": Circle,
+    "t-geocoder": geocoder,
   },
   data: function () {
     return {
       mapSettings: {
-        mapheight: "60vh",
+        mapheight: "82vh",
         mapwidth: "98vw",
       },
       isInRange: false,
       markers: [
         {
           id: 0,
-          isMarkerDraggable: true,
+          isMarkerDraggable: false,
           position: {
             lat: 53.5,
             lng: -2.19,
           },
-          postcodes:[]
+          postcodes: [],
+          radiusInMeters: [
+            { value: 6000, color: "#FF0000" },
+            { value: 800, color: "#00FF00" },
+            { value: 500, color: "#0000FF" },
+          ],
         },
         {
           id: 1,
-          isMarkerDraggable: false,
+          isMarkerDraggable: true,
           position: {
             lat: 53.52,
             lng: -2.2,
           },
-          radiusInMeters: [{value:2000 ,color:"#FF0000" }, {value:800 ,color:"#00FF00" }, {value:500 ,color:"#0000FF" }],
-          postcodes:[]
+          postcodes: [],
         },
       ],
     };
   },
   methods: {
     moveMarker: function (id, latLng) {
-      let base = this.markers[1]
+      let base = this.markers[0];
+      let marker = this.markers[id]
 
-      this.markers[id].position = latLng;
-        // set postcode on marker move
-       this.setPostcodes(id ,latLng)
+      marker.position = latLng;
+      // set postcode on marker move
+      this.setPostcodes(marker);
 
-        // get distance betwean base and client
-        this.checkDelivery(base , latLng)
+      // get distance betwean base and client
+      this.checkDelivery(base, marker);
     },
 
-    setPostcodes:function(id , latLng){
-        fetchPostcodes.getPostcode(latLng).then(res=>{
-           res.json()
-           .then(x=>{
-             this.markers[id].postcodes =  x.features
-           })
-         })
+    setPostcodes: function (marker) {
+      fetchPostcodes.getPostcode(marker.position).then((res) => {
+        res.json().then((x) => {
+          marker.postcodes = x.features;
+        });
+      });
     },
 
-    checkDelivery:function(base, latLng){
-      if(latLng.distanceTo(base.position) < base.radiusInMeters[0].value){
-        this.isInRange = true
+    setMarker:function(result){
+      let base = this.markers[0];
+      let marker = this.markers[1]
+
+      marker.position = latLng(result.center[1] , result.center[0])
+
+      this.checkDelivery(base , marker)
+
+    },
+
+    checkDelivery: function (base , marker) {
+      if (latLng(base.position).distanceTo(marker.position) < base.radiusInMeters[0].value) {
+        this.isInRange = true;
       } else {
-        this.isInRange = false
+        this.isInRange = false;
       }
-     }
+    },
   },
 };
 </script>

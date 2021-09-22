@@ -1,7 +1,9 @@
 module.exports = {
     configureWebpack: config => {
       config.externals = {
-        'leaflet': 'L'
+        'leaflet': 'L',
+        'mapboxgl':'mapboxgl',
+        'MapboxGeocoder':'MapboxGeocoder',
       }
     },
     css: {
