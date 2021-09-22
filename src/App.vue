@@ -9,23 +9,7 @@
   </h2>
   <div class="d-flex justify-content-center align-items-center">
     <br /><br />
-    <t-geocoder
-      v-on:search="setMarker"
-    ></t-geocoder>
-    <button
-      :class="[
-        'btn m-2',
-        markers[1].isMarkerDraggable ? 'btn-success' : 'btn-danger',
-      ]"
-      :key="index"
-      v-on:click="markers[1].isMarkerDraggable = !markers[1].isMarkerDraggable"
-      v-html="
-        `Base marker is ${
-          markers[1].isMarkerDraggable ? 'draggable' : 'non draggable'
-        }`
-      "
-    ></button>
-    <br /><br />
+    <t-geocoder v-on:search="setMarker"></t-geocoder>
   </div>
   <div class="d-flex justify-content-around">
     <t-map
@@ -42,16 +26,18 @@
         :draggable="marker.isMarkerDraggable"
         v-on:moveMarker="moveMarker"
       >
+      </t-marker>
+      <template v-for="(area, index) in areas" :key="index">
         <t-circle
-          v-for="(radius, index) in marker.radiusInMeters"
+          v-for="(circle, index) in area.radiusInMeters"
           :key="index"
-          :radius="radius.value"
-          :color="radius.color"
-          :lat="marker.position.lat"
-          :lng="marker.position.lng"
+          :radius="circle.value"
+          :color="circle.color"
+          :lat="area.position.lat"
+          :lng="area.position.lng"
         >
         </t-circle>
-      </t-marker>
+      </template>
     </t-map>
   </div>
 </template>
@@ -62,7 +48,7 @@ import Marker from "./components/Marker.vue";
 import Circle from "./components/Circle.vue";
 import fetchPostcodes from "./components/fetchPostcodes.vue";
 import geocoder from "./components/geoCoder.vue";
-import { latLng } from 'leaflet'
+import { latLng } from "leaflet";
 
 export default {
   name: "App",
@@ -82,12 +68,22 @@ export default {
       markers: [
         {
           id: 0,
-          isMarkerDraggable: false,
+          isMarkerDraggable: true,
+          position: {
+            lat: 53.5,
+            lng: -2.32,
+          },
+          postcodes: [],
+        },
+      ],
+      areas: [
+        {
+          id: 0,
+          isMarkerDraggable: true,
           position: {
             lat: 53.5,
             lng: -2.19,
           },
-          postcodes: [],
           radiusInMeters: [
             { value: 6000, color: "#FF0000" },
             { value: 800, color: "#00FF00" },
@@ -98,25 +94,43 @@ export default {
           id: 1,
           isMarkerDraggable: true,
           position: {
-            lat: 53.52,
-            lng: -2.2,
+            lat: 53.56,
+            lng: -2.42,
           },
-          postcodes: [],
+          radiusInMeters: [
+            { value: 6000, color: "#FF0000" },
+            { value: 800, color: "#00FF00" },
+            { value: 500, color: "#0000FF" },
+          ],
+        },
+        {
+          id: 2,
+          isMarkerDraggable: true,
+          position: {
+            lat: 53.6,
+            lng: -2.21,
+          },
+          radiusInMeters: [
+            { value: 6000, color: "#FF0000" },
+            { value: 800, color: "#00FF00" },
+            { value: 500, color: "#0000FF" },
+          ],
         },
       ],
     };
   },
   methods: {
     moveMarker: function (id, latLng) {
-      let base = this.markers[0];
-      let marker = this.markers[id]
+      // let base = this.markers[0];
+      let marker = this.markers[id];
 
       marker.position = latLng;
       // set postcode on marker move
       this.setPostcodes(marker);
 
       // get distance betwean base and client
-      this.checkDelivery(base, marker);
+
+      this.checkDelivery(marker);
     },
 
     setPostcodes: function (marker) {
@@ -127,18 +141,28 @@ export default {
       });
     },
 
-    setMarker:function(result){
-      let base = this.markers[0];
-      let marker = this.markers[1]
+    setMarker: function (result) {
+      // let base = this.markers[0];
+      let marker = this.markers[0];
 
-      marker.position = latLng(result.center[1] , result.center[0])
+      marker.position = latLng(result.center[1], result.center[0]);
 
-      this.checkDelivery(base , marker)
-
+      this.checkDelivery(marker);
     },
 
-    checkDelivery: function (base , marker) {
-      if (latLng(base.position).distanceTo(marker.position) < base.radiusInMeters[0].value) {
+    checkDelivery: function (marker) {
+      let areas = this.areas;
+  // TODO just for test 
+      if (
+        latLng(marker.position).distanceTo(areas[0].position) <
+        areas[0].radiusInMeters[0].value 
+        || 
+        latLng(marker.position).distanceTo(areas[1].position) <
+        areas[1].radiusInMeters[0].value
+        || 
+        latLng(marker.position).distanceTo(areas[2].position) <
+        areas[2].radiusInMeters[0].value
+      ) {
         this.isInRange = true;
       } else {
         this.isInRange = false;

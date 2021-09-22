@@ -1,3 +1,7 @@
+<template>
+    <slot></slot>
+</template>
+
 <script>
 
 import L from 'leaflet'
