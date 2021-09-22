@@ -1,14 +1,19 @@
 <template>
   <h1 class="text-center">HELLO WORLD! RP TRACKER APP</h1>
+  <h2 :class="['text-center', isInRange ? 'btn-success' : 'btn-danger']">{{isInRange ? 'Grate news! We can delivery to your address!' : 'Bad news! We can NOT delivery to your address :('}}</h2>
+  <ul v-for="(marker, index) in markers" :key="index" class="list">
+    <li v-for="(postcode, index) in marker.postcodes" :key="index">
+      {{postcode.place_name}}
+    </li>
+  </ul>
   <div class="d-flex justify-content-center align-items-center">
     <br /><br />
     <button
-      class="btn btn-primary m-2"
-      v-for="(marker, index) in markers"
+      :class="['btn m-2', markers[1].isMarkerDraggable ? 'btn-success' : 'btn-danger']"
       :key="index"
-      v-on:click="marker.isMarkerDraggable = !marker.isMarkerDraggable"
+      v-on:click="markers[1].isMarkerDraggable = !markers[1].isMarkerDraggable"
       v-html="
-        `Marker ${marker.id} Lat:${markers[0].position.lat}  Lng:${markers[0].position.lng} draggable ${marker.isMarkerDraggable}`
+        `Base marker is ${markers[1].isMarkerDraggable ? 'draggable' : 'non draggable'}`
       "
     ></button>
     <br /><br />
@@ -46,6 +51,8 @@
 import Map from "./components/Map.vue";
 import Marker from "./components/Marker.vue";
 import Circle from "./components/Circle.vue";
+import fetchPostcodes from './components/fetchPostcodes.vue'
+
 
 export default {
   name: "App",
@@ -60,6 +67,7 @@ export default {
         mapheight: "60vh",
         mapwidth: "98vw",
       },
+      isInRange: false,
       markers: [
         {
           id: 0,
@@ -68,7 +76,7 @@ export default {
             lat: 53.5,
             lng: -2.19,
           },
-          radiusInMeters: [{value:2000 ,color:"#FF0000" }, {value:800 ,color:"#00FF00" }, {value:500 ,color:"#0000FF" },]
+          postcodes:[]
         },
         {
           id: 1,
@@ -77,15 +85,40 @@ export default {
             lat: 53.52,
             lng: -2.2,
           },
-          radiusInMeters: [{value:4000 ,color:"#FF33AA" }, {value:3000 ,color:"#33FFAA" }, {value:500 ,color:"#33AAFF" },]
+          radiusInMeters: [{value:2000 ,color:"#FF0000" }, {value:800 ,color:"#00FF00" }, {value:500 ,color:"#0000FF" }],
+          postcodes:[]
         },
       ],
     };
   },
   methods: {
     moveMarker: function (id, latLng) {
+      let base = this.markers[1]
+
       this.markers[id].position = latLng;
+        // set postcode on marker move
+       this.setPostcodes(id ,latLng)
+
+        // get distance betwean base and client
+        this.checkDelivery(base , latLng)
     },
+
+    setPostcodes:function(id , latLng){
+        fetchPostcodes.getPostcode(latLng).then(res=>{
+           res.json()
+           .then(x=>{
+             this.markers[id].postcodes =  x.features
+           })
+         })
+    },
+
+    checkDelivery:function(base, latLng){
+      if(latLng.distanceTo(base.position) < base.radiusInMeters[0].value){
+        this.isInRange = true
+      } else {
+        this.isInRange = false
+      }
+     }
   },
 };
 </script>

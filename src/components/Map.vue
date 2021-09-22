@@ -32,7 +32,7 @@ export default {
             id: 'mapbox/streets-v11',
             tileSize: 512,
             zoomOffset: -1,
-            accessToken: "pk.eyJ1IjoiYm9va2luZ29ubGluZSIsImEiOiJja2Job2U3MDUwN2ExMnRxdm53Njd3MXEzIn0.KDd8MAU8eEW0EHi9Vfn7wA"
+            accessToken: window.accessToken
         }).addTo(this.map);
         }
     }
