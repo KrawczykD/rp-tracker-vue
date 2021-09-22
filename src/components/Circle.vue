@@ -4,7 +4,7 @@ import L from 'leaflet'
 
 export default {
 inject:['map'],
-props:['lat','lng','radius'],
+props:['lat','lng','radius','color'],
 data:function(){
     return{
         circle : null,
@@ -26,7 +26,7 @@ watch:{
 
 methods:{
     createCircle:function(){
-        this.circle = L.circle([this.lat,this.lng],{radius: this.radius})
+        this.circle = L.circle([this.lat,this.lng],{radius: this.radius , color:this.color , fillOpacity: 0.3})
         .addTo(this.map.value)  
 
     },

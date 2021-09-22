@@ -24,34 +24,25 @@
       v-on:moveMarker="moveMarker"
     >
     <t-circle
-      :radius="400"
+      :radius="2000"
+      :color="'#FF0000'"
       :lat="marker.position.lat"
       :lng="marker.position.lng">
     </t-circle>
     <t-circle
       :radius="900"
+      :color="'#00FF00'"
       :lat="marker.position.lat"
       :lng="marker.position.lng">
     </t-circle>
     <t-circle
-      :radius="2000"
+      :radius="500"
+      :color="'#0000FF'"
       :lat="marker.position.lat"
       :lng="marker.position.lng">
     </t-circle>
     </t-marker>
   </t-map>
-  <!-- <t-map v-bind:mapid="'map1'" v-bind:mapheight="mapSettings.mapheight" v-bind:mapwidth="mapSettings.mapwidth">
-    <t-marker
-      v-for="(marker , index) in markers"
-      :key=index
-      :markerid="marker.id"
-      :lat="marker.position.lat"
-      :lng="marker.position.lng"
-      :draggable="marker.isMarkerDraggable"
-      v-on:moveMarker="moveMarker"
-    >
-    </t-marker>
-  </t-map> -->
   </div>
 </template>
 
