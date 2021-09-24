@@ -8,7 +8,7 @@ import L from 'leaflet'
 
 export default {
 inject:['map'],
-props:['lat','lng','markerid','draggable'],
+props:['lat','lng','draggable','icon'],
 data:function(){
     return{
         marker : null,
@@ -34,13 +34,15 @@ watch:{
 
 methods:{
     createMarker:function(){
-        this.marker = L.marker([this.lat,this.lng],{draggable: this.draggable})
+        var myIcon = L.divIcon({className:this.icon});
+
+        this.marker = L.marker([this.lat,this.lng],{draggable: this.draggable , icon: myIcon})
             .on('dragend',()=>{this.resetMarkerPosition()})
             .addTo(this.map.value)  
     },
 
     resetMarkerPosition:function(){
-        this.$emit('moveMarker' , this.markerid , this.marker.getLatLng())
+        this.$emit('moveMarker', this.marker.getLatLng())
     }
 },
 

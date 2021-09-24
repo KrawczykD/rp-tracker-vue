@@ -1,11 +1,12 @@
 <template>
-  <div id="geocoder"></div>
+  <div :id="id"></div>
 </template>
 <script>
 import MapboxGeocoder from "MapboxGeocoder";
 
 export default {
   name: "geocoder",
+  props:['id'],
   mounted: function () {
     const geocoder = new MapboxGeocoder({
       accessToken: window.accessToken,
@@ -14,7 +15,7 @@ export default {
       countries: "GB",
     });
 
-    geocoder.addTo("#geocoder");
+    geocoder.addTo(`#${this.id}`);
 
     geocoder.on("result", (e)=>{
         this.$emit('search',e.result)

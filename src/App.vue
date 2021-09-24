@@ -1,53 +1,62 @@
 <template>
-  <h1 class="text-center">HELLO WORLD! RP TRACKER APP</h1>
-  <h2 :class="['text-center', isInRange ? 'btn-success' : 'btn-danger']">
-    {{
-      isInRange
-        ? "Grate news! We can delivery to your address!"
-        : "Bad news! We can NOT delivery to your address :("
-    }}
-  </h2>
-  <div class="d-flex justify-content-center align-items-center">
-    <br /><br />
-    <t-geocoder v-on:search="setMarker"></t-geocoder>
-  </div>
-  <div class="d-flex justify-content-around">
-    <t-map
-      v-bind:mapid="'map0'"
-      v-bind:mapheight="mapSettings.mapheight"
-      v-bind:mapwidth="mapSettings.mapwidth"
-    >
-      <t-marker
-        v-for="(marker, index) in markers"
-        :key="index"
-        :markerid="marker.id"
-        :lat="marker.position.lat"
-        :lng="marker.position.lng"
-        :draggable="marker.isMarkerDraggable"
-        v-on:moveMarker="moveMarker"
-      >
-      </t-marker>
-      <template v-for="(area, index) in areas" :key="index">
-        <t-circle
-          v-for="(circle, index) in area.radiusInMeters"
-          :key="index"
-          :radius="circle.value"
-          :color="circle.color"
-          :lat="area.position.lat"
-          :lng="area.position.lng"
+  <div class="row m-0">
+    <div class="col-6">
+      <t-list
+        :points="[
+          [0, 10],
+          [10, 20],
+          [20, 30],
+          [30, 40],
+          [40, 50],
+          [50, 60],
+          [60, 70],
+          [70, 80],
+          [80, 90],
+          [90, 100],
+        ]"
+      ></t-list>
+    </div>
+    <div class="col-6">
+      <div class="col-12 d-flex justify-content-center p-4">
+        <i class="fa fa-home fs-1 px-4"></i><t-geocoder :id="'user'" v-on:search="setMarker($event ,baseMarker)"></t-geocoder>
+        <i class="fa fa-car fs-1 px-4"></i><t-geocoder :id="'base'" v-on:search="setMarker($event ,markers[0])"></t-geocoder>
+      </div>
+      <div class="col-12">
+        <t-map
+          v-bind:mapid="'map0'"
+          v-bind:mapheight="mapSettings.mapheight"
+          v-bind:mapwidth="mapSettings.mapwidth"
         >
-        </t-circle>
-      </template>
-    </t-map>
+          <t-marker
+            v-for="(marker, index) in markers"
+            :key="index"
+            :icon="`fa fa-car fs-1`"
+            :lat="marker.position.lat"
+            :lng="marker.position.lng"
+            :draggable="marker.isMarkerDraggable"
+            v-on:moveMarker="moveMarker($event ,marker)"
+          >
+          </t-marker>
+          <t-marker
+            :lat="baseMarker.position.lat"
+            :icon="`fa fa-home fs-1`"
+            :lng="baseMarker.position.lng"
+            :draggable="baseMarker.isMarkerDraggable"
+            v-on:moveMarker="moveMarker($event ,baseMarker)"
+          >
+          </t-marker>
+        </t-map>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import Map from "./components/Map.vue";
 import Marker from "./components/Marker.vue";
-import Circle from "./components/Circle.vue";
 import fetchPostcodes from "./components/fetchPostcodes.vue";
 import geocoder from "./components/geoCoder.vue";
+import List from "./components/List.vue";
 import { latLng } from "leaflet";
 
 export default {
@@ -55,22 +64,33 @@ export default {
   components: {
     "t-map": Map,
     "t-marker": Marker,
-    "t-circle": Circle,
     "t-geocoder": geocoder,
+    "t-list": List,
   },
   data: function () {
     return {
       mapSettings: {
-        mapheight: "82vh",
-        mapwidth: "98vw",
+        mapheight: "90vh",
+        mapwidth: "100%",
       },
       isInRange: false,
-      markers: [
+      baseMarker:
         {
           id: 0,
           isMarkerDraggable: true,
           position: {
             lat: 53.5,
+            lng: -2.32,
+          },
+          postcodes: [],
+        },
+
+      markers: [
+        {
+          id: 0,
+          isMarkerDraggable: true,
+          position: {
+            lat: 53.60,
             lng: -2.32,
           },
           postcodes: [],
@@ -120,10 +140,7 @@ export default {
     };
   },
   methods: {
-    moveMarker: function (id, latLng) {
-      // let base = this.markers[0];
-      let marker = this.markers[id];
-
+    moveMarker: function (latLng,marker) {
       marker.position = latLng;
       // set postcode on marker move
       this.setPostcodes(marker);
@@ -141,32 +158,16 @@ export default {
       });
     },
 
-    setMarker: function (result) {
-      // let base = this.markers[0];
-      let marker = this.markers[0];
+    setMarker: function (result,marker) {
 
       marker.position = latLng(result.center[1], result.center[0]);
 
       this.checkDelivery(marker);
     },
 
-    checkDelivery: function (marker) {
-      let areas = this.areas;
-  // TODO just for test 
-      if (
-        latLng(marker.position).distanceTo(areas[0].position) <
-        areas[0].radiusInMeters[0].value 
-        || 
-        latLng(marker.position).distanceTo(areas[1].position) <
-        areas[1].radiusInMeters[0].value
-        || 
-        latLng(marker.position).distanceTo(areas[2].position) <
-        areas[2].radiusInMeters[0].value
-      ) {
-        this.isInRange = true;
-      } else {
-        this.isInRange = false;
-      }
+    checkDelivery: function () {
+
+
     },
   },
 };
