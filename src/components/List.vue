@@ -1,118 +1,118 @@
 <template>
-    <!-- <div class="d-flex flex-column">
-        <div class="w-100">
-        <button v-on:click="add(this.singleArray ,0)" class="btn m-2 btn-primary col-1">0 add</button>
-        <button v-on:click="add(this.singleArray ,10)" class="btn m-2 btn-primary col-1">10 add</button>
-        <button v-on:click="add(this.singleArray ,20)" class="btn m-2 btn-primary col-1">20 add</button>
-        <button v-on:click="add(this.singleArray ,30)" class="btn m-2 btn-primary col-1">30 add</button>
-        <button v-on:click="add(this.singleArray ,40)" class="btn m-2 btn-primary col-1">40 add</button>
-        <button v-on:click="add(this.singleArray ,50)" class="btn m-2 btn-primary col-1">50 add</button>
-        <button v-on:click="add(this.singleArray ,60)" class="btn m-2 btn-primary col-1">60 add</button>
-        <button v-on:click="add(this.singleArray ,70)" class="btn m-2 btn-primary col-1">70 add</button>
-        <button v-on:click="add(this.singleArray ,80)" class="btn m-2 btn-primary col-1">80 add</button>
-        <button v-on:click="add(this.singleArray ,90)" class="btn m-2 btn-primary col-1">90 add</button>
-        <button v-on:click="add(this.singleArray ,100)" class="btn m-2 btn-primary col-1">100 add</button>
-        <button v-on:click="add(this.singleArray ,200)" class="btn m-2 btn-primary col-1">200 add</button>
-        <button v-on:click="add(this.singleArray ,300)" class="btn m-2 btn-primary col-1">300 add</button>
-        <button v-on:click="addTwo(this.singleArray ,20 , 40)" class="btn m-2 btn-primary col-1">add 20 40</button>
-        </div>
-    </div> -->
-    <div class="row fs-5">
-        <ul class="col-6 text-center">
-            <li class="list-group-item justify-content-center align-items-center" 
-            v-for="(item , index) in multipleArrays" :key="index">{{item[0]}} , {{item[1]}}
-              <button v-on:click="remove(this.singleArray ,item[0])" class="btn mx-2 btn-primary"><i class="fa fa-trash"></i></button>
-            </li>
-        </ul>
-    </div>
-    
+  <div class="row fs-5">
+    <div class="w-100 text-end">
 
+    <input type="number" name="end" id="" placeholder="value" v-model="value" />
+    <input
+      type="number"
+      name="price"
+      id=""
+      placeholder="price"
+      v-model="price"
+    />
+    <button v-on:click="add(this.arrayOfPoints, value, price)">add</button>
+    </div>
+    <ul class="col-6 text-end w-100">
+      <li
+        class="list-group-item"
+        v-for="(item, index) in arrayOfPoints"
+        :key="index"
+      >
+        from: {{ item.start }} , to: {{ item.end }} , £{{ item.price }}
+        <button
+          v-on:click="remove(this.arrayOfPoints, item.end)"
+          class="btn mx-2 btn-primary"
+        >
+          <i class="fa fa-trash"></i>
+        </button>
+      </li>
+    </ul>
+  </div>
 </template>
 
 <script>
 export default {
   props: ["points"],
-  mounted: function () {
-    this.singleArray = this.toSingleArray(this.points)
+  mounted: function () {},
 
-    this.multipleArrays = this.toMultipleArrays(this.singleArray)
+  data: function () {
+    return {
+      arrayOfPoints: this.points,
+      price: null,
+      value: null,
+    };
   },
-
-  data:function(){
-      return{
-          singleArray:[],
-          multipleArrays:[]
-      }
-      
-  },
-
-//   watch:{
-//       singleArray :function(){
-//               this.multipleArrays = this.toMultipleArrays(this.singleArray)
-//       }
-//   },
 
   methods: {
-    toSingleArray: function (multipleArrays) {
-      let connectedArrays = Array.prototype.concat.apply([], multipleArrays);
-      let noDuplicatesArray = [...new Set(connectedArrays)];
+    add: function (array, value, price) {
+      if (this.price !== null && this.value !== null) {
+        let foundedIndex = array.findIndex((item) => item.end === value);
 
-      return noDuplicatesArray;
-    },
+        if (foundedIndex === -1) {
+          // if value not exist check 
+          let foundedHigher = array.findIndex((item) => item.end > value);
 
-    toMultipleArrays: function (singleArray) {
-      let multipleArrays = [];
-
-      for (let x = 0; x < singleArray.length - 1; x++) {
-        multipleArrays.push([singleArray[x], singleArray[x + 1]]);
-      }
-
-      return multipleArrays;
-    },
-
-    remove: function (array , number) {
-      for (var i = array.length - 1; i >= 0; i--) {
-        if (array[i] == number) {
-          array.splice(i, 1);
-        }
-      }
-      this.multipleArrays = this.toMultipleArrays(this.singleArray)
-    },
-
-    add:function(array,number){
-        if(array.findIndex(item => item === number) === -1){
-            array.push(number)
-            array.sort(function(a, b){return a-b})
-        } 
-        this.multipleArrays = this.toMultipleArrays(this.singleArray)
-    },
-
-    addTwo:function(array,number1,number2){
-        if(array.findIndex(item => item === number1) === -1){
-            if(array.findIndex(item => item === number2) === -1){
-                array.push(number1)
-                array.push(number2)
-                array.sort(function(a, b){return a-b})
+          if (foundedHigher !== -1) {
+            // if founded higher value check
+            if (array[foundedHigher - 1]) {
+              // if higher value is not only element in array add before and take start value from previous
+              array.splice(foundedHigher, 0, {
+                start: array[foundedHigher - 1].end,
+                end: value,
+                price: price,
+              });
+            } else {
+              // if higher value is only value add before and set start to 0
+              array.splice(foundedHigher, 0, {
+                start: 0,
+                end: value,
+                price: price,
+              });
             }
-
+          } else if (array[array.length - 1]) {
+            // if there is no higher check if there is previous value and add element on the end
+            array.push({
+              start: array[array.length - 1].end,
+              end: value,
+              price: price,
+            });
+          } else {
+            // if there is no previous element add element and set start to 0
+            array.push({
+              start: 0,
+              end: value,
+              price: price,
+            });
+          }
+          // optimize array 
+          this.optimize(array);
+        } else {
+          // if value exist update it
+          this.remove(array, value);
+          this.add(array, value, price);
         }
-
-        
-        this.multipleArrays = this.toMultipleArrays(this.singleArray)
+      }
+      //set input value to null
+      this.price = null;
+      this.value = null;
     },
 
-
-
-
-    getRandomColor:function() {
-        var letters = '0123456789ABCDEF';
-        var color = '#';
-        for (var i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
+    remove: function (array, value) {
+      for (var i = array.length - 1; i >= 0; i--) {
+        if (array[i].end == value) {
+          array.splice(i, 1);
+          this.optimize(array);
         }
-        return color;
-}
+      }
+    },
 
+    optimize: function (array) {
+      array.forEach((element, index) => {
+        if (array[index + 1]) {
+          array[index + 1].start = element.end;
+        }
+      });
+    },
   },
 };
 </script>
